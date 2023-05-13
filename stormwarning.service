@@ -1,0 +1,13 @@
+[Unit]
+Description=Storm warning
+
+[Install]
+WantedBy=default.service
+
+[Service]
+Type=oneshot
+Restart=on-failure
+RestartSec=60
+
+EnvironmentFile=/home/dottedmag/stormwarning/env
+ExecStart=/home/dottedmag/stormwarning/stormwarning
