@@ -48,7 +48,7 @@ func main() {
 	malta := must.OK1(time.LoadLocation("Europe/Malta"))
 	cityID := "2562305"
 	from := "winds@dottedmag.net"
-	to := "dottedmag@dottedmag.net"
+	to := []string{"dottedmag@dottedmag.net", "natalia.gusarov@gmail.com"}
 
 	weather, err := fetchWeather(apiKey, cityID)
 	if err != nil {
@@ -56,10 +56,12 @@ func main() {
 	}
 
 	if strong := strongWindsTomorrow(weather, malta); strong != nil {
-		msg := formatMessage(from, to, strong, malta)
+		for _, to := range to {
+			msg := formatMessage(from, to, strong, malta)
 
-		if err := sendMessage(must.OK1(mail.ParseAddress(to)), []byte(msg)); err != nil {
-			panic(err)
+			if err := sendMessage(must.OK1(mail.ParseAddress(to)), []byte(msg)); err != nil {
+				panic(err)
+			}
 		}
 	}
 }
