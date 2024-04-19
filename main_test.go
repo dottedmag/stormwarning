@@ -24,5 +24,5 @@ func TestStuff(t *testing.T) {
 	fmt.Printf("%#v\n", response)
 	malta := must.OK1(time.LoadLocation("Europe/Malta"))
 	strong := strongWindsTomorrow(response.List, malta)
-	fmt.Println(formatStrongWind(strong, malta))
+	fmt.Println(formatWinds(strong, malta))
 }

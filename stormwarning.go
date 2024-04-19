@@ -3,13 +3,15 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/mail"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ridge/must/v2"
@@ -44,22 +46,31 @@ func formatWinds(predictions []prediction, loc *time.Location) string {
 }
 
 func main() {
-	apiKey := os.Getenv("OWM_API_KEY")
-	malta := must.OK1(time.LoadLocation("Europe/Malta"))
-	cityID := "2562305"
-	from := "winds@dottedmag.net"
-	to := []string{"dottedmag@dottedmag.net", "natalia.gusarov@gmail.com"}
+	locationStr := flag.String("location", "Europe/Malta", "")
+	cityID := flag.String("city-id", "2562305", "")
+	from := flag.String("from-email", "winds@dottedmag.net", "")
 
-	weather, err := fetchWeather(apiKey, cityID)
+	flag.Parse()
+
+	if locationStr == nil || cityID == nil || from == nil {
+		flag.Usage()
+		os.Exit(2)
+	}
+
+	apiKey := os.Getenv("OWM_API_KEY")
+	to := strings.Split(strings.TrimSpace(os.Getenv("TO")), ",")
+	location := must.OK1(time.LoadLocation(*locationStr))
+
+	weather, err := fetchWeather(apiKey, *cityID)
 	if err != nil {
 		panic(err)
 	}
 
-	if strong := strongWindsTomorrow(weather, malta); strong != nil {
+	if strong := strongWindsTomorrow(weather, location); strong != nil {
 		for _, to := range to {
-			msg := formatMessage(from, to, strong, malta)
+			msg := formatMessage(*from, to, strong, location)
 
-			if err := sendMessage(must.OK1(mail.ParseAddress(to)), []byte(msg)); err != nil {
+			if err := sendMessage(must.OK1(mail.ParseAddress(*from)), []byte(msg)); err != nil {
 				panic(err)
 			}
 		}
@@ -101,7 +112,7 @@ func fetchWeather(apiKey string, cityID string) ([]prediction, error) {
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
