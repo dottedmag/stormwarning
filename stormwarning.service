@@ -2,7 +2,7 @@
 Description=Storm warning
 
 [Install]
-WantedBy=default.service
+WantedBy=default.target
 
 [Service]
 Type=oneshot
