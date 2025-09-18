@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"net/http"
 	"net/mail"
 	"os"
@@ -112,16 +111,14 @@ func fetchWeather(apiKey string, cityID string) ([]prediction, error) {
 		return nil, err
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("expected 200 OK, got %s", resp.Status)
 	}
 
 	var response struct {
 		List []prediction `json:"list"`
 	}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
 
