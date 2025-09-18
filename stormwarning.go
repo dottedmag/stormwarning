@@ -96,7 +96,7 @@ func strongWindsTomorrow(predictions []prediction, loc *time.Location) []predict
 		if !sameDate(tomorrow, time.Time(prediction.Date), loc) {
 			continue
 		}
-		if prediction.Wind.Speed > 10 || prediction.Wind.Gust > 15 {
+		if prediction.Wind.Speed > 8 || prediction.Wind.Gust > 10 {
 			out = append(out, prediction)
 		}
 	}
